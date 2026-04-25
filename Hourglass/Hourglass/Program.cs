@@ -10,9 +10,21 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 using Microsoft.OpenApi;
+using System.Diagnostics;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Logging.Configure(options =>
+{
+    options.ActivityTrackingOptions = ActivityTrackingOptions.TraceId
+        | ActivityTrackingOptions.SpanId
+        | ActivityTrackingOptions.ParentId;
+});
+builder.Logging.AddSimpleConsole(options =>
+{
+    options.IncludeScopes = true;
+});
 
 builder.Services.AddProblemDetails();
 builder.Services.AddOpenApi(options =>
@@ -105,7 +117,12 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 }
 
-app.UseExceptionHandler();
+app.UseExceptionHandler(new ExceptionHandlerOptions
+{
+    StatusCodeSelector = exception => exception is BadHttpRequestException
+        ? StatusCodes.Status400BadRequest
+        : StatusCodes.Status500InternalServerError
+});
 app.UseStatusCodePages();
 
 app.UseHttpsRedirection();
