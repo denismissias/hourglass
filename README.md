@@ -1,54 +1,167 @@
 # Hourglass
 
+Hourglass is a time-tracking API built with ASP.NET Core Minimal API, JWT authentication, MySQL, and native OpenAPI.
+
 ## Technologies and Tools
 
-- .NET 7
+- .NET 10
+- ASP.NET Core Minimal API
+- Native OpenAPI
+- Scalar API Reference
+- JWT Bearer authentication
+- Entity Framework Core with Pomelo MySQL provider
 - MySQL 8.0
-- Docker
+- Docker and Docker Compose
+- xUnit, FluentAssertions, Moq, and EF Core InMemory
 
-## Getting started
+## Current API Surface
 
-To start API:
-1. Go to **/Hourglass** folder
-2. Execute `docker-compose up -d`
-- The api is running on port 3000
-- Swagger link is http://localhost:3000/swagger/index.html
+The API currently exposes these endpoints:
 
-There is an user created in User Table:
-- login: admin
-- password: admin
+- `POST /api/v{version}/authenticate`
+- `POST /api/v{version}/users`
+- `PUT /api/v{version}/users/{id}`
+- `GET /api/v{version}/users/{id}`
+- `POST /api/v{version}/times`
+- `GET /health`
 
-There are 10 projects created in Project Table (Ids from 1 to 10)
+Routes under `/users` and `/times` require a valid JWT bearer token.
 
-## Project estimate by tasks
+## Running with Docker
 
-| Task | Description | Time to spend |
-| ------ | ------ | ------ |
-| Project Planning	 | Understanding the scope and panning of activities | 2h |
-| Database modelling | Users, times and projects relationships | 1h |
-| Project Setup | Initial AspNet core project setup, with Docker and Docker compose | 8h |
-| JWT Authentication | Generate token, validate token, decode token and password encryption, with unit tests | 4h |
-| POST /api/v{n}/authenticate | Authentication, with unit tests and swagger documentation | 4h |
-| POST /api/v{n}/times | Time register, with unit tests and swagger documentation | 4h |
-| GET /api/v{n}/users/{ID} | User get, with unit tests and swagger documentation | 4h |
-| POST /api/v{n}/users | User register, with unit tests and swagger documentation | 4h |
-| PUT /api/v{n}/users/{ID} | User edit, with unit tests and swagger documentation | 4h |
-| GET /api/v{n}/projects | Project list, with unit tests and swagger documentation | 4h |
-| GET /api/v{n}/projects/{project_id} | Project get, with unit tests and swagger documentation | 4h |
-| POST /api/v{n}/projects | Project register, with unit tests and swagger documentation | 4h |
-| PUT /api/v{n}/projects/{project_id} | Project edit, with unit tests and swagger documentation | 4h |
-| GET /api/v{n}/times/{project_id} | Time get, with unit tests and swagger documentation | 4h |
-| PUT /api/v{n}/times/{time_id} | Time edit, with unit tests and swagger documentation | 4h |
-| Project documentation | Steps to execute project in README | 1h |
+1. Go to the `Hourglass` folder.
+2. Run `docker-compose up -d`.
 
-**Total**: 60 hours.
+The API is exposed at `http://localhost:3000`.
 
-## Project estimate in days
+API documentation:
 
-**Delivery time**: 15 working days (4 working hours per day)
+- Scalar UI: `http://localhost:3000/scalar/v1`
+- OpenAPI document: `http://localhost:3000/openapi/v1.json`
 
-## Suggestions to Next Steps
+## Running locally
 
-- Create log structure
-- CI/CD Configuration
-- Handle error improvements
+1. Go to the `Hourglass/Hourglass` folder.
+2. Run `dotnet run`.
+
+Development profiles are configured to open the API documentation automatically.
+
+Default local URLs:
+
+- HTTP: `http://localhost:5212`
+- HTTPS: `https://localhost:7173`
+
+Local API documentation:
+
+- Scalar UI: `/scalar/v1`
+- OpenAPI document: `/openapi/v1.json`
+
+## Authentication
+
+Authentication is done with JWT Bearer tokens.
+
+1. Call `POST /api/v1/authenticate` with login and password.
+2. Copy the returned token.
+3. Send the token in the `Authorization` header using `Bearer {token}`.
+
+JWT settings are configured through `appsettings.json`, `appsettings.Development.json`, or User Secrets.
+
+### Example: Authenticate
+
+Request:
+
+```json
+{
+	"login": "admin",
+	"password": "admin"
+}
+```
+
+Response:
+
+```json
+{
+	"token": "eyJhbGciOi...",
+	"user": {
+		"userId": 1,
+		"login": "admin",
+		"name": "Admin",
+		"email": "admin@admin.com"
+	}
+}
+```
+
+## Request and Response Examples
+
+### Example: Create User
+
+Request:
+
+```json
+{
+	"name": "Jane Doe",
+	"email": "jane.doe@example.com",
+	"login": "jane.doe",
+	"password": "StrongPassword123"
+}
+```
+
+Response:
+
+```json
+{
+	"userId": 2,
+	"login": "jane.doe",
+	"name": "Jane Doe",
+	"email": "jane.doe@example.com"
+}
+```
+
+### Example: Create Time Entry
+
+Request:
+
+```json
+{
+	"project_id": 1,
+	"user_id": 1,
+	"started_at": "2026-04-25T08:00:00Z",
+	"ended_at": "2026-04-25T12:00:00Z"
+}
+```
+
+Response:
+
+```json
+{
+	"time_id": 1,
+	"project_id": 1,
+	"user_id": 1,
+	"started_at": "2026-04-25T08:00:00Z",
+	"ended_at": "2026-04-25T12:00:00Z"
+}
+```
+
+## Seed Data
+
+On a clean database initialization through Docker, the SQL bootstrap script creates:
+
+- one default user
+- login: `admin`
+- password: `admin`
+- 10 sample projects with IDs from `1` to `10`
+
+If the MySQL volume already exists, this data may already be present from a previous run.
+
+## Running Tests
+
+Run all automated tests with:
+
+`dotnet test`
+
+The solution includes unit tests for repositories and token generation.
+
+## Notes
+
+- OpenAPI and Scalar are mapped in Development.
+- The health endpoint is available at `/health`.
