@@ -1,5 +1,4 @@
-﻿using Hourglass.Request;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Hourglass.Models
 {
@@ -9,13 +8,6 @@ namespace Hourglass.Models
         public Time()
         {
 
-        }
-        public Time(TimeRequest request)
-        {
-            ProjectId = request.ProjectId;
-            UserId = request.UserId;
-            StartedAt = request.StartedAt;
-            EndedAt = request.EndedAt;
         }
 
         [Column("time_id")]

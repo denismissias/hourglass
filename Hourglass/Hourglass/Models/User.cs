@@ -1,5 +1,4 @@
-﻿using Hourglass.Request;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Hourglass.Models
 {
@@ -8,13 +7,6 @@ namespace Hourglass.Models
         public User()
         {
 
-        }
-        public User(UserRequest request)
-        {
-            Login = request.Login;
-            Password = BCrypt.Net.BCrypt.HashPassword(request.Password);
-            Name = request.Name;
-            Email = request.Email;
         }
 
         [Column("user_id")]
