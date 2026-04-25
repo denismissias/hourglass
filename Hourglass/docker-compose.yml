@@ -1,0 +1,21 @@
+version: '3.4'
+
+services:
+    hourglass:
+        image: ${DOCKER_REGISTRY-}hourglass
+        build:
+            context: .
+            dockerfile: Hourglass/Dockerfile
+    mysql:
+        image: mysql:8.0
+        volumes:
+            - hourglass-mysql-data:/var/lib/mysql
+            - ./db:/docker-entrypoint-initdb.d
+        environment:
+            MYSQL_ROOT_PASSWORD: secret
+            MYSQL_DATABASE: hourglass
+        ports:
+            - "3306:3306"
+        command: --init-file /docker-entrypoint-initdb.d/create_database.sql
+volumes:
+  hourglass-mysql-data:
