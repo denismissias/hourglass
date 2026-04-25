@@ -1,4 +1,5 @@
-﻿using Hourglass.Models;
+﻿using Hourglass.Configuration;
+using Hourglass.Models;
 using Hourglass.Services.Interfaces;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -7,21 +8,32 @@ using System.Text;
 
 namespace Hourglass.Services
 {
-    public class TokenService : ITokenService
+    /// <summary>
+    /// Service for generating JWT tokens
+    /// </summary>
+    public class TokenService(JwtSettings jwtSettings) : ITokenService
     {
+        /// <summary>
+        /// Generates a JWT token for the specified user
+        /// </summary>
+        /// <param name="user">The user to generate a token for</param>
+        /// <returns>The generated JWT token string</returns>
         public string Generate(User user)
         {
+            ArgumentNullException.ThrowIfNull(user);
+
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes("2254279d-3e33-4cac-9de1-5b20759c75ea");
+            var key = Encoding.ASCII.GetBytes(jwtSettings.Secret);
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(
                 [
                     new(ClaimTypes.Name, user.Name),
-                    new(ClaimTypes.Email, user.Email)
+                    new(ClaimTypes.Email, user.Email),
+                    new(ClaimTypes.NameIdentifier, user.Id.ToString())
                 ]),
-                Issuer = "Hourglass",
-                Expires = DateTime.UtcNow.AddHours(2),
+                Issuer = jwtSettings.Issuer,
+                Expires = DateTime.UtcNow.AddHours(jwtSettings.ExpirationHours),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
 

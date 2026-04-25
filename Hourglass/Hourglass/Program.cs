@@ -1,3 +1,4 @@
+using Hourglass.Configuration;
 using Hourglass.Filters;
 using Hourglass.Repository;
 using Hourglass.Repository.Interfaces;
@@ -27,13 +28,25 @@ var connection = builder.Configuration.GetConnectionString("Default");
 var serverVersion = new MySqlServerVersion(new Version(8, 0, 33));
 
 builder.Services.AddDbContext<MySqlContext>(
-            dbContextOptions => dbContextOptions
-                .UseMySql(connection, serverVersion)
-                .LogTo(Console.WriteLine, LogLevel.Information)
-                .EnableSensitiveDataLogging()
-                .EnableDetailedErrors());
+            dbContextOptions =>
+            {
+                dbContextOptions.UseMySql(connection, serverVersion);
 
-var key = Encoding.ASCII.GetBytes("2254279d-3e33-4cac-9de1-5b20759c75ea");
+                if (builder.Environment.IsDevelopment())
+                {
+                    dbContextOptions
+                        .LogTo(Console.WriteLine, LogLevel.Debug)
+                        .EnableSensitiveDataLogging()
+                        .EnableDetailedErrors();
+                }
+            });
+
+var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>() 
+    ?? throw new InvalidOperationException("Jwt settings are not configured");
+
+builder.Services.AddSingleton(jwtSettings);
+
+var key = Encoding.ASCII.GetBytes(jwtSettings.Secret);
 builder.Services.AddAuthentication(x =>
 {
     x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -41,13 +54,14 @@ builder.Services.AddAuthentication(x =>
 })
 .AddJwtBearer(x =>
 {
-    x.RequireHttpsMetadata = false;
+    x.RequireHttpsMetadata = !builder.Environment.IsDevelopment();
     x.SaveToken = true;
     x.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuerSigningKey = true,
         IssuerSigningKey = new SymmetricSecurityKey(key),
-        ValidateIssuer = false,
+        ValidateIssuer = true,
+        ValidIssuer = jwtSettings.Issuer,
         ValidateAudience = false
     };
 });
