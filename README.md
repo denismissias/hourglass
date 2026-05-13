@@ -161,6 +161,28 @@ Run all automated tests with:
 
 The solution includes unit tests for repositories and token generation.
 
+## AI Onboarding
+
+This repository is documented so AI-assisted changes can be made with the right context and review checklist.
+
+1. Read `AGENTS.md` for project-specific agent constraints and definition of done.
+2. Read `docs/ai-harness/ONBOARDING.md` for the onboarding flow and prompt template.
+3. Read `docs/ai-harness/PROJECT-MAP.md` for a fast overview of architecture and change paths.
+4. Use the provided VS Code tasks or run the solution checks directly.
+
+Standard validation:
+
+```bash
+dotnet restore Hourglass/Hourglass.sln
+dotnet build Hourglass/Hourglass.sln
+dotnet test Hourglass/Hourglass.sln
+```
+
+Additional onboarding assets:
+
+- VS Code task runner: `.vscode/tasks.json`
+- PR checklist template: `.github/PULL_REQUEST_TEMPLATE.md`
+
 ## Notes
 
 - OpenAPI and Scalar are mapped in Development.

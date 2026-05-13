@@ -1,0 +1,27 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "AI Onboarding: Build",
+      "type": "shell",
+      "command": "dotnet",
+      "args": [
+        "build",
+        "Hourglass/Hourglass.sln"
+      ],
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "AI Onboarding: Test",
+      "type": "shell",
+      "command": "dotnet",
+      "args": [
+        "test",
+        "Hourglass/Hourglass.sln"
+      ],
+      "group": "test",
+      "problemMatcher": []
+    }
+  ]
+}
